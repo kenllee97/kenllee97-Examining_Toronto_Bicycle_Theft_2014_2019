@@ -47,5 +47,3 @@ library(tidyverse)
 
 
 # References
-
-
