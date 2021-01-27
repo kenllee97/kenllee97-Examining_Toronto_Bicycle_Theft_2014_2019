@@ -1,8 +1,8 @@
 ---
-title: "Test"
-subtitle: "TBD"
-author: "TBD"
-thanks: "Code and data are available at: LINK."
+title: "Examining Bicycle Thefts in Toronto"
+subtitle: "From 2014 to 2019"
+author: "Ken Lee"
+thanks: "Code and data are available at: https://github.com/kenllee97/kenllee97-Examining_Toronto_Bicycle_Theft_2014_2019."
 date: "`r format(Sys.time(), '%d %B %Y')`"
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
 output:
@@ -22,26 +22,6 @@ library(tidyverse)
 
 # Data
 
-
-
-# Model
-
-# Results
-
-# Discussion
-
-## First discussion point
-
-## Second discussion point
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-
-\newpage
-
-# Appendix {-}
 
 \newpage
 
