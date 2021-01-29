@@ -20,5 +20,7 @@ raw_data <-
   select(id) %>% 
   opendatatoronto::get_resource()
 
-### Save Data ###  
-write.csv(raw_data, "inputs/data/raw_data.csv")
+### Save Data ### 
+# I have decided to use write_delim because using write_csv ends up creating
+# a duplicate column of id when I read/load it back in later.
+write_delim(raw_data, "inputs/data/raw_data.csv", na = "NA", delim = ",")
