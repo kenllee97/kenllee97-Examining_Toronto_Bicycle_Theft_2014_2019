@@ -11,6 +11,7 @@
 ### Workspace setup ###
 # Use R Projects, not setwd().
 library(tidyverse)
+library(janitor)
 
 # Load/Read in the raw data.
 raw_data <- readr::read_delim("inputs/data/raw_data.csv", delim = ","
@@ -30,5 +31,12 @@ print(NA_values) #Here we can see that the latitude has significantly higher
 # Long and geometry are also removed since we won't be using these for the analysis.
 cleaned_data <- subset(raw_data, select = -c(Lat, Long, geometry))
 
+# Checking for duplicates
+get_dupes(cleaned_data)
+# No duplicates found
+
 ### Save Data ### 
 write_delim(cleaned_data, "inputs/data/cleaned_data.csv", na = "NA", delim = ",")
+
+write_delim(cleaned_data, "outputs/paper 1/cleaned_data.csv", 
+            na = "NA", delim = ",") # Saving cleaned data into the paper folder

@@ -1,0 +1,200 @@
+---
+title: "Examining Bicycle Thefts in Toronto"
+subtitle: "From 2014 to 2019"
+author: "Ken Lee"
+thanks: "Code and data are available at: https://github.com/kenllee97/kenllee97-Examining_Toronto_Bicycle_Theft_2014_2019."
+date: "`r format(Sys.time(), '%d %B %Y')`"
+abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+output:
+  bookdown::pdf_document2:
+    toc: FALSE
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+# Load/Read in the raw data
+cleaned_data <- readr::read_delim("cleaned_data.csv", delim = ","
+                             )
+```
+
+# Introduction
+|   Biking is a phenomenon that is shared across the world, bringing benefits such as exercising, saving money, reducing carbon emissions, and much more. However, there are many challenges that limit its wider usage. One of those challenges is bike theft, which is a common problem that occurs in many major cities from San Francisco all the way to Toronto. Therefore, it is vital to understand the patterns and causes of of these events.
+
+|   This paper will focus on documented cases of bike thefts in the city of Toronto, examining bicycle thefts and its bike related crimes such as breaking and entering and shoplifting. The main purpose of this study is to understand the patterns of bike theft and the factors that cold be causing or encouraging them. In other words, this paper will take a look at the bicycle thefts from 2014 to 2019, examining the patterns throughout the years, times, and  factors such as the bike cost, type, and whether they were recovered. 
+
+\newpage
+
+# Data
+
+## Data Source
+|   The data we are using for this report comes from the R package opendatatoronto. This package helps us obtain the data sourced from Toronto's Open Data Portal, which is the official source for data collected from the city's divisions and agencies. The data set we will be focusing on is "Bicycle Thefts", which was published by Toronto Police Services and last updated on Aug 18, 2020 (data set refreshes annually). Additionally, the data set is under the Open GOvernment License - Toronto. 
+
+|   The "Bicycle Theft" data set contains bicycle theft occurrences from 2014 to 2019, containing the following features: _id, Index_, event_unique_id, Primary_Offence, Occurrence_Date, Occurrence_Year, Occurrence_Month, Occurrence_Day, Occurrence_Time, Division, City, Location_Type, Premise_Type, Bike_Make, Bike_Model, Bike_Type, Bike_Speed, Bike_Colour, Cost_of_Bike, Status, Hood_ID, Neighbourhood, Lat, Long, ObjectId, and geometry.
+
+|   You can find the code on how we retrieved the data on Toronto bicycle thefts in the scripts folder. 
+
+## Data Biases
+
+|   Before summarizing the data, it is important for us to review the potential biases from this data set that may affect the internal and external validity of this paper's findings. One of the main biases to consider is the fact that this data set only includes information on reported bike thefts, disregarding unreported ones. The data set also includes year, month, day, and time of the occurrence, but should not be taken solemnly as some of the victims may not recall the date and time of the incident accurately (especially when there are no NA values for these fields). For instance, a victim may have left a bicycle unattended, whether locked or not, for a couple of days before finding out it was stolen. Hence, the individual would not be able to tell exactly when the incident took place. Speaking of unintentional false data recollection, this data may also suffer from an intentional false data recollection. The reason being that individuals may have many reasons for creating a false report such as claiming an insurance policy (affecting the accuracy of the bike price). Additionally, the data set is also biased because it only consists of items that were stolen, leaving out items that were not stolen. This would ultimately create a biased analysis on potential features causing thefts to happen.   
+
+|   At last, another aspect of the data that may affect the statistical significance and validity of this paper's findings is the fact that locations (latitude and longitude) were deliberately offset to the nearest road intersection for ethical reasons, protecting the privacy of the parties involved. Nevertheless, it is also  vital to have accurate information on neighborhoods of the incidents, as biased data may create biased patterns that could result in more police patrols in certain areas and reduced traffic to certain neighborhoods, affecting local businesses. All in all, the data set may have potential biases and inaccuracies which can affect the paper's validity and involve ethical implications regarding the use it's discovered findings.
+
+## Exploratory Analysis
+
+|   Upon the initial exploratory analysis, we have created a graph showing the frequency of bike theft related incidents from 2014 to 2019 (**Figure \@ref(fig:fig1)**). From the graph, we can clearly see a cyclical pattern that seems to follow the seasonal changes of the city of Toronto. More specifically, the number of bike theft occurrences seems to reach its peak during the summer (warm periods), and its troughs during the winter (cold periods). All in all, bike thefts in Toronto seem to follow a logical cyclical weather pattern as there will be more bike sage during the summer (leading to higher chances of bike theft), and less bike usage during the winter (decreasing the chances of bike thefts).
+
+
+```{r fig1, fig.cap = "Bike Theft Occurences From 2014 to 2019", echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 5}
+
+#Creating an Offence frequency variable
+Offence_f <- cleaned_data %>%
+  # Counting the frequency of Primary sorted them in a descending order.
+  count(Primary_Offence, sort = TRUE, name = "Frequency", ) %>% 
+  # Filtered the top ten.
+  top_n(10)
+
+Date_by_Offence <- cleaned_data %>%
+  filter(cleaned_data$Primary_Offence %in% Offence_f$Primary_Offence) %>% 
+  group_by(Primary_Offence) %>% 
+  count(Occurrence_Date, name = "Frequency")
+
+Date_by_Offence %>% 
+  ggplot(mapping = aes(Occurrence_Date, Frequency)) + 
+  geom_line() +
+  theme_minimal() + 
+  labs(title = "Bike Theft Occurences From 2014 to 2019", x = "Date (year)", y = "Bike Thefts") +
+  theme(plot.title = element_text(size = 15, face = "bold.italic", hjust = 0.5))
+```
+
+\newpage
+
+|   Nevertheless, if we dice the the Occurrences into their primary offences, we can derive more detailed insights into the patterns of bike thefts in Toronto from 2014 to 2019. **Table \@ref(tab:table1)** shows us the top 10 most frequent primary offences, denoting general thefts under $5,000 and bicycle thefts under $5,000. This goes to show us that most of the thefts are on normal bikes and their parts. Additionally, **Figure \@ref(fig:fig2)** illustrates the frequency of the top ten primary offences from 2014 to 2019. From this figure, we can identify two unique events and patterns. The first one is the change in primary offences, as thefts under $5,000 dominates from 2014 to 2016, but then shifts to theft of bicycle under $5,000 from 2016 to 2019 (Illustrating how thieves began to steal whole bicycles instead of just its parts). The second insight is the fact that there was a spike of property found in the beginning of 2017, which seems to make sense, as the previous year is the period where more whole bikes were stolen, making it easier to be found. Nevertheless, it does not further explain why the number of property found decreased by mid 2017 (Maybe the perpetrators learned and adapted their methodologies,  obscuring the tracking of stolen items).
+
+
+```{r table1, fig.cap = "Frequency of Primary Offences", echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 5}
+
+# Created table using kable
+Offence_f %>% kable(col.names = c("Primary Offence", "Frequency"), 
+                    caption = "Top 10 Primary Offences Freqencies") %>% 
+  row_spec(0, bold = TRUE) %>%  # Bolden column names.
+  # Holding the table in position
+  kable_styling(latex_options = "hold_position")
+
+```
+
+
+
+```{r fig2, fig.cap = "Top 10 Primary Offences From 2014 to 2019", echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 5}
+
+Date_by_Offence %>% 
+  ggplot(mapping = aes(x = Occurrence_Date, y = Frequency, colour = Primary_Offence)) + 
+  geom_line() +
+  theme_minimal() +  
+  labs(title = "Top 10 Primary Offences From 2014 to 2019", x = "Date (year)", y = "Frequency") +
+  theme(legend.title = element_blank(), plot.title = element_text(size = 15, face = "bold.italic", hjust = 0.5), legend.position = "bottom")
+```
+
+\newpage
+
+|   Now that we know the cyclical pattern of bicycle thefts and the changing trend of having the whole bicycle stolen, what can be done to reduce its chances of happening, or at least increasing the chances to recover them? **Figure \@ref(fig:fig3)** shows us a point histogram of all the bike costs. The first aspect we notice is that many of the prices ranged between $0 and $1,000. There were also some outliers as Table **\@ref(tab:table2)** denotes a maximum of $120,000. Additionally, it also shows us that the mean is 938, with a median of 600, highlighting the right skewness of the data. 
+
+|   Hence, based on this data, we can tell that the majority of the thefts happen at the lower end of the cost, and this may be because there much more lower-valued bikes and items, and more expensive properties may be secured more safely (reducing chances of theft). However, a histogram is not enough, as one would need other techniques such as logistic regression models and less biased data to determine the correlation between cost and chances of theft. Additionally, there would also be other challenges limiting the analysis and correlation of these features. One of them is that they are not distilled into groups of primary offences, meaning the cost covers a wide array of items from bicycles to electric bikes. Therefore, it would be hard to make such a general conclusion, as there would be different factors at play for distinct items such as a bicycle and a store. Additionally, most of the data on stolen bikes have blank cost values, further complicating the the analysis.
+
+
+
+```{r fig3, fig.cap = "Cost of Bike Occreces Frequency", echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 4, fig.pos = "H"}
+
+# Plotting the bike cost frequency into a point graph
+cleaned_data %>% 
+  count(Cost_of_Bike, name = "Frequency", sort = TRUE) %>% 
+  ggplot(mapping = aes(Cost_of_Bike, Frequency)) +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Cost of Bike Occreces Frequency", x = "Cost of Bike", y = "Frequency") +
+  theme(legend.title = element_blank(), plot.title = element_text(size = 15, face = "bold.italic", hjust = 0.5))
+```
+
+
+```{r table2, fig.cap = "Top 10 Primary Offences From 2014 to 2019", echo = FALSE, warning = FALSE, message = FALSE, fig.width = 9, fig.height = 4}
+cleaned_data %>% 
+  filter(Cost_of_Bike != "NA") %>% 
+  select(Cost_of_Bike) %>% 
+  summary() %>% 
+  kable(caption = "Cost of Bike Statistical Summary") %>% 
+  row_spec(0, bold = TRUE) %>%  # Bolden column names
+  kable_styling(latex_options = "hold_position") # Holding the table in position
+```
+
+\newpage
+
+|   Nevertheless, although we may not be able to distinctively identify causation of theft from the prices, we can examine the recovery of thefts. **Figure \@ref(fig:fig4)** illustrates the cost of the recovered thefts, highlighting how higher cost thefts may have lower chances of being recovered, seeing as most of the recovered items are at the low end. However, we cannot clearly pin whether lower costs can lead to higher chances of recovery, as many other thefts that were not recovered were also in the same range. 
+
+```{r fig4, fig.cap = "Recovered Thefts Costs", echo = FALSE, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 2.5}
+
+cleaned_data %>% 
+  ggplot(mapping = aes(x = Status, y = Cost_of_Bike )) +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Recovered Thefts Costs", x = "Status", y = "Costs") +
+  theme(legend.title = element_blank(), plot.title = element_text(size = 12, face = "bold.italic", hjust = 0.5))
+
+```
+
+\newpage
+
+|   At last, we also explored other factors individuals have control over, such as the colour of the bike, to determine which ones had the highest chance for recovery. **Table \@ref(tab:table3)** illustrates the thefts of bikes grouped by the ten most reported colours, denoting their frequency and recovery date. From the table, we can tell that black was the colour that was stolen the most. This makes sense, as it is probably the most used colour. However we also cannot conclude that this colour will increase the chances of theft, as we do not have the data on all the other bikes that were not stolen. Nevertheless, we can recognize that the color red bike has the highest chances of recovery, as it had the highest recovery rate.
+
+```{r table3, fig.cap = "Bike Colour Frequency and Recovery Rate", echo = FALSE, warning = FALSE, message = FALSE, fig.width = 9, fig.height = 4}
+
+Bike_Colour_f <- cleaned_data %>% 
+  filter(!is.na(Bike_Colour)) %>% 
+  count(Bike_Colour, name = "Frequency", sort = TRUE) %>% 
+  top_n(10)
+
+Recovered_by_Bike_Colour <- cleaned_data %>% 
+  filter(Status == "RECOVERED") %>% 
+  count(Bike_Colour, name = "Recovered", sort = TRUE) 
+
+colour_recovered <- merge(Bike_Colour_f, Recovered_by_Bike_Colour, by = "Bike_Colour") %>% 
+  mutate(Recovery_Rate = Recovered / Frequency) %>% 
+  arrange(desc(Recovery_Rate)) 
+
+colour_recovered %>% 
+  kable(caption = "Bike Colour Frequency and Recovery Rate", col.names = c("Bike Color", "Frequency", "Recovered", "Recovery Rate")) %>% 
+  row_spec(0, bold = TRUE) %>%  # Bolden column names
+  kable_styling(latex_options = "hold_position") # Holding the table in position
+```
+
+|   The final factor we explored was the type of bike. **Table \@ref(tab:table4)** shows the frequency in which different types of bikes were stolen and their recovery rates. Here we can see that mountain bikes (MT) were the most stolen, but as mentioned before, it can not be said that it increases the chances of theft as we have no data on the bikes that were not stolen. For all we know, they might just have been the most stolen because of their higher proportion of mountain bikes in the population. Nevertheless, we can tell that BMX bikes had the highest recovery rate.
+
+```{r table4, fig.cap = "Bike Type Freqency and Recovery Rate", echo = FALSE, warning = FALSE, message = FALSE, fig.width = 9, fig.height = 4}
+
+Bike_Type_f <- cleaned_data %>% 
+  count(Bike_Type, name = "Frequency", sort = TRUE)
+
+Recovered_by_Bike_Type <- cleaned_data %>% 
+  filter(Status == "RECOVERED") %>% 
+  count(Bike_Type, name = "Recovered", sort = TRUE)
+
+bike_type_recovered <- merge(Bike_Type_f, Recovered_by_Bike_Type, by = "Bike_Type") %>% 
+  mutate(Recovery_Rate = Recovered / Frequency) %>% 
+  arrange(desc(Recovery_Rate)) 
+
+bike_type_recovered %>% 
+  kable(caption = "Bike Type Freqency and Recovery Rate", col.names = c("Bike Type", "Frequency", "Recovered", "Recovery Rate")) %>% 
+  row_spec(0, bold = TRUE) %>%  # Bolden column names
+  kable_styling(latex_options = "hold_position") # Holding the table in position
+```
+
+|   All in all, this paper may have uncovered the cyclical theft pattern of bikes, the changing trend of stealing bikes, and the idea that a cheap red BMX bike may have the highest chance of recovery, but it certainly does not explain the causes for the theft. After all, this paper was just an exploratory examination of the Toronto bike theft data set. To further understand the features affecting thefts and how to reduce this problem, more data sets on the bike populations (especially ones that have not been stolen) and other aspects such as number of bike parking spots need to be examined simultaneously. Only then would we be able to implement more techniques from logistic regression to deep learning to further understand the cases of this problematic phenomenon. 
+
+\newpage
+
+
+# References
