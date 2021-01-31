@@ -38,5 +38,5 @@ get_dupes(cleaned_data)
 ### Save Data ### 
 write_delim(cleaned_data, "inputs/data/cleaned_data.csv", na = "NA", delim = ",")
 
-write_delim(cleaned_data, "outputs/paper 1/cleaned_data.csv", 
+write_delim(cleaned_data, "outputs/paper/cleaned_data.csv", 
             na = "NA", delim = ",") # Saving cleaned data into the paper folder

@@ -107,7 +107,9 @@ Neightborhood_f <- cleaned_data %>%
   count(Neighbourhood, name = "Frequency", sort = TRUE) %>% 
   top_n(10)
 
+
 ### B. Relational Analysis ###
+
 
 ## B1. Date by Primary Offence
 Date_by_Offence <- cleaned_data %>%
